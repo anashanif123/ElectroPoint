@@ -1,11 +1,11 @@
 import React from 'react';
-import image from '../assets/pics/frame.png';
-import image1 from '../assets/pics/frameM.jpg';
-import image2 from '../assets/pics/frame (1).png';
-import image3 from '../assets/pics/frame (2).png';
-import image4 from '../assets/pics/frame (3).png';
-import image5 from '../assets/pics/frame (4).png';
-import image6 from '../assets/pics/frame (5).png';
+import image from '../assets/pics/Frame.png';
+import image1 from '../assets/pics/FrameM.jpg';
+import image2 from '../assets/pics/Frame (1).png';
+import image3 from '../assets/pics/Frame (2).png';
+import image4 from '../assets/pics/Frame (3).png';
+import image5 from '../assets/pics/Frame (4).png';
+import image6 from '../assets/pics/Frame (5).png';
 const categories = [
   { icon:image , label: 'Computer & Laptop' },
   { icon: image1, label: 'Mobile & Phone' },
