@@ -1,0 +1,18 @@
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .sidebar-item {
+    transition: color 0.2s, background-color 0.2s;
+  }
+  
+  .sidebar-item:hover {
+    color: #f5f5f5;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  

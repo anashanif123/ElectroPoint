@@ -7,6 +7,7 @@ import { signOut } from "firebase/auth";
 import { AiOutlineDashboard, AiOutlineUser, AiOutlineShoppingCart } from 'react-icons/ai'; // Icons for Sidebar
 import { Bar, Pie } from 'react-chartjs-2'; // Import chart components
 import 'chart.js/auto';
+import '../components/style.css'; // Import your CSS file here
 
 function AdminPanel() {
   const [orders, setOrders] = useState([]);
@@ -137,21 +138,21 @@ function AdminPanel() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Dashboard Cards */}
               <div 
-                className="bg-blue-500 text-white shadow-lg p-6 rounded-xl cursor-pointer hover:shadow-xl transition" 
+                className="bg-blue-500 text-white shadow-lg p-6 rounded-xl cursor-pointer card" 
                 onClick={() => setCardDetails({ title: 'Total Orders', value: orders.length })}
               >
                 <h3 className="text-lg font-semibold">Total Orders</h3>
                 <p className="mt-4 text-2xl">{orders.length}</p>
               </div>
               <div 
-                className="bg-green-500 text-white shadow-lg p-6 rounded-xl cursor-pointer hover:shadow-xl transition" 
+                className="bg-green-500 text-white shadow-lg p-6 rounded-xl cursor-pointer card" 
                 onClick={() => setCardDetails({ title: 'Total Revenue', value: `$${totalRevenue.toFixed(2)}` })}
               >
                 <h3 className="text-lg font-semibold">Total Revenue</h3>
                 <p className="mt-4 text-2xl">${totalRevenue.toFixed(2)}</p>
               </div>
               <div 
-                className="bg-purple-500 text-white shadow-lg p-6 rounded-xl cursor-pointer hover:shadow-xl transition" 
+                className="bg-purple-500 text-white shadow-lg p-6 rounded-xl cursor-pointer card" 
                 onClick={() => setCardDetails({ title: 'Total Users', value: users.length })}
               >
                 <h3 className="text-lg font-semibold">Total Users</h3>
@@ -216,31 +217,23 @@ function AdminPanel() {
                         <td className="py-4 px-6 border-b">{order.id}</td>
                         <td className="py-4 px-6 border-b">{order.userDetails.name}</td>
                         <td className="py-4 px-6 border-b">
-                          {Array.isArray(order.cartItems) && order.cartItems.length > 0 ? (
-                            <ul>
-                              {order.cartItems.map((item, index) => (
-                                <li key={index}>
-                                  {item.title} - {item.quantity}{" "}
-                                  {item.quantity > 1 ? "pcs" : "pc"}
-                                </li>
-                              ))}
-                            </ul>
+                          {Array.isArray(order.cartItems) ? (
+                            order.cartItems.map((item) => (
+                              <div key={item.id}>{item.title} (x{item.quantity})</div>
+                            ))
                           ) : (
-                            <p>No items available</p>
+                            <div>No items</div>
                           )}
                         </td>
-                        <td className="py-4 px-6 border-b">${order.totalPrice}</td>
+                        <td className="py-4 px-6 border-b">${order.totalPrice.toFixed(2)}</td>
                         <td className="py-4 px-6 border-b">{order.status}</td>
                         <td className="py-4 px-6 border-b">
-                          <select
-                            value={order.status}
-                            onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                            className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                          <button 
+                            className="text-blue-500" 
+                            onClick={() => updateOrderStatus(order.id, 'Completed')}
                           >
-                            <option value="In Progress">In Progress</option>
-                            <option value="Shipped">Shipped</option>
-                            <option value="Delivered">Delivered</option>
-                          </select>
+                            Mark as Completed
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -256,26 +249,15 @@ function AdminPanel() {
             <h2 className="text-3xl font-semibold mb-6 text-center">Users Dashboard</h2>
             <div className="bg-white p-6 rounded-xl shadow-lg">
               {users.length === 0 ? (
-                <Spin />
+                <p>No users found.</p>
               ) : (
-                <table className="min-w-full bg-white border rounded-lg">
-                  <thead>
-                    <tr className="bg-blue-500 text-white text-left">
-                      <th className="py-4 px-6">User ID</th>
-                      <th className="py-4 px-6">Name</th>
-                      <th className="py-4 px-6">Email</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {users.map((user) => (
-                      <tr key={user.id} className="hover:bg-gray-100">
-                        <td className="py-4 px-6 border-b">{user.id}</td>
-                        <td className="py-4 px-6 border-b">{user.username}</td>
-                        <td className="py-4 px-6 border-b">{user.email}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <ul className="list-disc pl-6">
+                  {users.map((user) => (
+                    <li key={user.id} className="py-2">
+                      {user.name} - {user.email}
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
           </div>
@@ -287,24 +269,30 @@ function AdminPanel() {
 
   return (
     <div className="flex">
-      <div className="bg-gray-900 w-64 h-screen p-5">
-        <h1 className="text-white text-2xl font-semibold mb-8">Admin Panel</h1>
+      {/* Sidebar */}
+      <div className="bg-gray-900 text-white w-64 h-screen p-6">
+        <h2 className="text-2xl font-semibold mb-4">Admin Panel</h2>
         <ul>
-          <li onClick={() => setActivePage("dashboard")} className="text-white cursor-pointer mb-4">
+          <li onClick={() => setActivePage("dashboard")} className="text-white cursor-pointer mb-4 sidebar-item">
             <AiOutlineDashboard /> Dashboard
           </li>
-          <li onClick={() => setActivePage("orders")} className="text-white cursor-pointer mb-4">
+          <li onClick={() => setActivePage("orders")} className="text-white cursor-pointer mb-4 sidebar-item">
             <AiOutlineShoppingCart /> Orders
           </li>
-          <li onClick={() => setActivePage("users")} className="text-white cursor-pointer mb-4">
+          <li onClick={() => setActivePage("users")} className="text-white cursor-pointer mb-4 sidebar-item">
             <AiOutlineUser /> Users
           </li>
         </ul>
-        <button onClick={handleLogout} className="mt-8 text-white bg-red-500 px-4 py-2 rounded">
+        <button 
+          onClick={handleLogout} 
+          className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
+        >
           Logout
         </button>
       </div>
-      <div className="flex-grow p-6">
+
+      {/* Main Content */}
+      <div className="flex-1 bg-gray-100 min-h-screen">
         {renderContent()}
       </div>
     </div>
