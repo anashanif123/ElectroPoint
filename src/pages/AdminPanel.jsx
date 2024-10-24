@@ -7,14 +7,12 @@ import { signOut } from "firebase/auth";
 import { AiOutlineDashboard, AiOutlineUser, AiOutlineShoppingCart } from 'react-icons/ai'; // Icons for Sidebar
 import { Bar, Pie } from 'react-chartjs-2'; // Import chart components
 import 'chart.js/auto';
-import '../components/style.css'; // Import your CSS file here
 
-function AdminPanel() {
+function Adminpage() {
   const [orders, setOrders] = useState([]);
   const [users, setUsers] = useState([]); // State for users
   const [loading, setLoading] = useState(true);
   const [activePage, setActivePage] = useState("dashboard"); // State for page navigation
-  const [cardDetails, setCardDetails] = useState(null); // State for card details
 
   // Fetch orders when activePage is "orders" or "dashboard"
   useEffect(() => {
@@ -59,6 +57,7 @@ function AdminPanel() {
       await updateDoc(orderRef, {
         status: newStatus,
       });
+   
     } catch (error) {
       console.error("Error updating order status: ", error);
     }
@@ -137,24 +136,15 @@ function AdminPanel() {
             <h2 className="text-3xl font-semibold mb-6">Dashboard Overview</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Dashboard Cards */}
-              <div 
-                className="bg-blue-500 text-white shadow-lg p-6 rounded-xl cursor-pointer card" 
-                onClick={() => setCardDetails({ title: 'Total Orders', value: orders.length })}
-              >
+              <div className="bg-white shadow-lg p-6 rounded-xl">
                 <h3 className="text-lg font-semibold">Total Orders</h3>
                 <p className="mt-4 text-2xl">{orders.length}</p>
               </div>
-              <div 
-                className="bg-green-500 text-white shadow-lg p-6 rounded-xl cursor-pointer card" 
-                onClick={() => setCardDetails({ title: 'Total Revenue', value: `$${totalRevenue.toFixed(2)}` })}
-              >
+              <div className="bg-white shadow-lg p-6 rounded-xl">
                 <h3 className="text-lg font-semibold">Total Revenue</h3>
                 <p className="mt-4 text-2xl">${totalRevenue.toFixed(2)}</p>
               </div>
-              <div 
-                className="bg-purple-500 text-white shadow-lg p-6 rounded-xl cursor-pointer card" 
-                onClick={() => setCardDetails({ title: 'Total Users', value: users.length })}
-              >
+              <div className="bg-white shadow-lg p-6 rounded-xl">
                 <h3 className="text-lg font-semibold">Total Users</h3>
                 <p className="mt-4 text-2xl">{users.length}</p>
               </div>
@@ -174,22 +164,6 @@ function AdminPanel() {
                 <Pie data={pieData} />
               </div>
             </div>
-
-            {/* Card Detail Modal */}
-            {cardDetails && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                <div className="bg-white p-4 rounded-lg shadow-lg">
-                  <h2 className="text-xl font-semibold">{cardDetails.title}</h2>
-                  <p className="mt-2 text-lg">{cardDetails.value}</p>
-                  <button 
-                    onClick={() => setCardDetails(null)} 
-                    className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         );
       case "orders":
@@ -217,23 +191,31 @@ function AdminPanel() {
                         <td className="py-4 px-6 border-b">{order.id}</td>
                         <td className="py-4 px-6 border-b">{order.userDetails.name}</td>
                         <td className="py-4 px-6 border-b">
-                          {Array.isArray(order.cartItems) ? (
-                            order.cartItems.map((item) => (
-                              <div key={item.id}>{item.title} (x{item.quantity})</div>
-                            ))
+                          {Array.isArray(order.cartItems) && order.cartItems.length > 0 ? (
+                            <ul>
+                              {order.cartItems.map((item, index) => (
+                                <li key={index}>
+                                  {item.title} - {item.quantity}{" "}
+                                  {item.quantity > 1 ? "pcs" : "pc"}
+                                </li>
+                              ))}
+                            </ul>
                           ) : (
-                            <div>No items</div>
+                            <p>No items available</p>
                           )}
                         </td>
-                        <td className="py-4 px-6 border-b">${order.totalPrice.toFixed(2)}</td>
+                        <td className="py-4 px-6 border-b">${order.totalPrice}</td>
                         <td className="py-4 px-6 border-b">{order.status}</td>
                         <td className="py-4 px-6 border-b">
-                          <button 
-                            className="text-blue-500" 
-                            onClick={() => updateOrderStatus(order.id, 'Completed')}
+                          <select
+                            value={order.status}
+                            onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                            className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                           >
-                            Mark as Completed
-                          </button>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Shipped">Shipped</option>
+                            <option value="Delivered">Delivered</option>
+                          </select>
                         </td>
                       </tr>
                     ))}
@@ -249,15 +231,26 @@ function AdminPanel() {
             <h2 className="text-3xl font-semibold mb-6 text-center">Users Dashboard</h2>
             <div className="bg-white p-6 rounded-xl shadow-lg">
               {users.length === 0 ? (
-                <p>No users found.</p>
+                <Spin />
               ) : (
-                <ul className="list-disc pl-6">
-                  {users.map((user) => (
-                    <li key={user.id} className="py-2">
-                      {user.name} - {user.email}
-                    </li>
-                  ))}
-                </ul>
+                <table className="min-w-full bg-white border rounded-lg">
+                  <thead>
+                    <tr className="bg-blue-500 text-white text-left">
+                      <th className="py-4 px-6">User ID</th>
+                      <th className="py-4 px-6">Name</th>
+                      <th className="py-4 px-6">Email</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.map((user) => (
+                      <tr key={user.id} className="hover:bg-gray-100">
+                        <td className="py-4 px-6 border-b">{user.id}</td>
+                        <td className="py-4 px-6 border-b">{user.username}</td>
+                        <td className="py-4 px-6 border-b">{user.email}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               )}
             </div>
           </div>
@@ -269,34 +262,28 @@ function AdminPanel() {
 
   return (
     <div className="flex">
-      {/* Sidebar */}
-      <div className="bg-gray-900 text-white w-64 h-screen p-6">
-        <h2 className="text-2xl font-semibold mb-4">Admin Panel</h2>
+      <div className="bg-gray-900 w-64 h-screen p-5">
+        <h1 className="text-white text-2xl font-semibold mb-8">Admin Panel</h1>
         <ul>
-          <li onClick={() => setActivePage("dashboard")} className="text-white cursor-pointer mb-4 sidebar-item">
+          <li onClick={() => setActivePage("dashboard")} className="text-white cursor-pointer mb-4">
             <AiOutlineDashboard /> Dashboard
           </li>
-          <li onClick={() => setActivePage("orders")} className="text-white cursor-pointer mb-4 sidebar-item">
+          <li onClick={() => setActivePage("orders")} className="text-white cursor-pointer mb-4">
             <AiOutlineShoppingCart /> Orders
           </li>
-          <li onClick={() => setActivePage("users")} className="text-white cursor-pointer mb-4 sidebar-item">
+          <li onClick={() => setActivePage("users")} className="text-white cursor-pointer mb-4">
             <AiOutlineUser /> Users
           </li>
         </ul>
-        <button 
-          onClick={handleLogout} 
-          className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
-        >
+        <button onClick={handleLogout} className="mt-8 text-white bg-red-500 px-4 py-2 rounded">
           Logout
         </button>
       </div>
-
-      {/* Main Content */}
-      <div className="flex-1 bg-gray-100 min-h-screen">
+      <div className="flex-grow p-6">
         {renderContent()}
       </div>
     </div>
   );
 }
 
-export default AdminPanel;
+export default Adminpage;
