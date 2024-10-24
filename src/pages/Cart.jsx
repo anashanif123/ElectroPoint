@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { db } from "../utils/utils.js"; // Import your Firebase config
-import { getAuth, onAuthStateChanged } from "firebase/auth"; // Import Firebase Auth
+import { db } from "../utils/utils.js"; 
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import {
   collection,
   query,
@@ -9,17 +9,16 @@ import {
   deleteDoc,
   doc,
   updateDoc,
-} from "firebase/firestore"; // Firestore functions
-import { motion, AnimatePresence } from "framer-motion"; // Import Framer Motion
-
+} from "firebase/firestore";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { DeleteFilled, DeleteOutlined } from "@ant-design/icons";
+import { DeleteFilled } from "@ant-design/icons";
 import { Spin } from "antd";
 
 function CartPage() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const auth = getAuth(); // Get the authenticated user
+  const auth = getAuth();
 
   useEffect(() => {
     const fetchCartItems = async (userId) => {
@@ -40,20 +39,20 @@ function CartPage() {
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        fetchCartItems(user.uid); // Fetch cart items only when the user is authenticated
+        fetchCartItems(user.uid); 
       } else {
-        setLoading(false); // Stop loading if the user is not logged in
+        setLoading(false);
       }
     });
 
-    return () => unsubscribe(); // Cleanup the listener on component unmount
+    return () => unsubscribe();
   }, [auth]);
 
   const removeFromCart = async (itemId) => {
     if (auth.currentUser) {
       try {
-        await deleteDoc(doc(db, "cart", itemId)); // Delete the item from Firestore
-        setCartItems(cartItems.filter((item) => item.id !== itemId)); // Update local state
+        await deleteDoc(doc(db, "cart", itemId)); 
+        setCartItems(cartItems.filter((item) => item.id !== itemId)); 
       } catch (error) {
         console.error("Error removing from cart:", error);
       }
@@ -64,17 +63,17 @@ function CartPage() {
     if (auth.currentUser && newQuantity > 0) {
       try {
         const itemRef = doc(db, "cart", itemId);
-        await updateDoc(itemRef, { quantity: newQuantity }); // Update the quantity in Firestore
+        await updateDoc(itemRef, { quantity: newQuantity });
         setCartItems(
           cartItems.map((item) =>
             item.id === itemId ? { ...item, quantity: newQuantity } : item
           )
-        ); // Update local state
+        );
       } catch (error) {
         console.error("Error updating quantity:", error);
       }
     } else if (newQuantity <= 0) {
-      removeFromCart(itemId); // Remove item if quantity is 0 or less
+      removeFromCart(itemId); 
     }
   };
 
@@ -85,7 +84,11 @@ function CartPage() {
   };
 
   if (loading) {
-    return <div className="min-h-screen flex justify-center items-center"><Spin size="large"/></div>;
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <Spin size="large" />
+      </div>
+    );
   }
 
   if (cartItems.length === 0) {
@@ -98,92 +101,82 @@ function CartPage() {
 
   return (
     <>
-      <div className="relative text-center">
-        
-           <hr />
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-black">
-            <h1 className="text-4xl font-bold">Cart</h1>
-          </div>
+      {/* Header */}
+      <div className="py-6 text-center">
+        <h1 className="text-4xl font-bold   bg-gradient-to-b from-white to-blue-200 p-8 rounded-lg shadow-lg">Your Cart</h1>
+        <p className="text-gray-500 mt-2">Review your items and proceed to checkout</p>
+      </div>
+
+      {/* Cart & Checkout Section */}
+      <div className="container mx-auto px-4 py-10 flex flex-wrap justify-between">
+        <div className="w-full md:w-2/3">
+          <AnimatePresence>
+            {cartItems.map((item) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -50 }}
+                transition={{ duration: 0.5 }}
+                className="bg-white shadow-lg rounded-lg mb-6 p-6 flex items-center justify-between"
+              >
+                <div className="flex items-center">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-24 h-24 object-cover rounded mr-4"
+                  />
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-700">{item.title}</h3>
+                    <p className="text-gray-500">Price: ${item.price}</p>
+                    <div className="mt-2 flex items-center space-x-2">
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        className="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300"
+                      >
+                        -
+                      </button>
+                      <span>{item.quantity}</span>
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        className="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <p className="font-semibold">${(item.price * item.quantity).toFixed(2)}</p>
+                  <button
+                    onClick={() => removeFromCart(item.id)}
+                    className="text-red-600 hover:text-red-800"
+                  >
+                    <DeleteFilled />
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
-      
-      <div className="mx-auto px-4 py-10 flex flex-wrap">
-  <div className="w-full md:w-2/3">
-    <AnimatePresence>
-      {cartItems.map((item, index) => (
-        <motion.div
-          key={item.id}
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -50 }}
-          transition={{ duration: 0.5 }}
-          className={`bg-white shadow-lg rounded-lg p-6 mb-4 transform hover:scale-105 transition-transform duration-500 ease-in-out ${index === cartItems.length - 1 ? 'mb-8' : ''}`} // Add extra margin-bottom to the last item
-        >
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <img
-                src={item.image}
-                alt={item.title}
-                className="w-40 h-40 object-cover rounded mr-4"
-              />
-              <div>
-                <h3 className="text-lg font-semibold">{item.title}</h3>
-                <p className="text-gray-600">Price: ${item.price}</p>
-                <p className="text-gray-600">
-                  Quantity:
-                  <button
-                    onClick={() =>
-                      updateQuantity(item.id, item.quantity - 1)
-                    }
-                    className="bg-gray-300 text-gray-800 py-1 px-3 mx-2 rounded hover:bg-gray-400 transition-colors"
-                  >
-                    -
-                  </button>
-                  {item.quantity}
-                  <button
-                    onClick={() =>
-                      updateQuantity(item.id, item.quantity + 1)
-                    }
-                    className="bg-gray-300 text-gray-800 py-1 px-3 mx-2 rounded hover:bg-gray-400 transition-colors"
-                  >
-                    +
-                  </button>
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => removeFromCart(item.id)}
-              style={{ color: "blue" }}
-              className="bg-white py-1 px-3 rounded hover:bg-red-600 transition-colors"
-            >
-              <DeleteFilled />
-            </button>
+
+        {/* Checkout Section */}
+        <div className="w-full md:w-1/3 bg-white shadow-lg rounded-lg p-6 h-auto flex flex-col justify-between">
+          <div>
+            <h3 className="text-2xl font-semibold text-gray-700 mb-6">Order Summary</h3>
+            <p className="text-lg text-gray-600">Subtotal: ${calculateTotalPrice()}</p>
+            <p className="text-lg text-gray-600 mt-2">Shipping: Free</p>
+            <p className="text-xl font-bold text-gray-700 mt-4">
+              Total: ${calculateTotalPrice()}
+            </p>
           </div>
-        </motion.div>
-      ))}
-    </AnimatePresence>
-  </div>
-<hr />
-  {/* Checkout Section */}
-  <div className="w-full md:w-1/3"> {/* Increased margin-top here */}
-    <div
-     
-      className=" bg-blue-50 h-80 p-4 rounded-lg shadow-lg flex flex-col items-center justify-center"
-    >
-      <h3 className="text-4xl text-center font-semibold">Card Totals</h3>
-      <p className="text-xl text-center mb-2 mt-12">
-        Total Price: ${calculateTotalPrice()}
-      </p>
-      <Link to={"/Checkout"}>
-        <button
-          
-          className=" text-white py-2 px-4 rounded-xl mt-4  bg-blue-600 transition-colors border border-blue"
-        >
-          Checkout
-        </button>
-      </Link>
-    </div>
-  </div>
-</div>
+          <Link to="/Checkout">
+            <button className="mt-6 bg-blue-600 text-white w-full py-3 rounded-lg hover:bg-blue-700 transition-colors">
+              Proceed to Checkout
+            </button>
+          </Link>
+        </div>
+      </div>
     </>
   );
 }

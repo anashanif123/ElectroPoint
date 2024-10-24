@@ -31,15 +31,18 @@ const Contact = () => {
 
   return (
     <>
-       <div className="relative text-center">
-    
-        
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-black">
-            <h1 className="text-4xl font-bold">Contact</h1>
-           
-          
-        </div>
-      </div><br /><br /><br /> 
+          <div className="relative text-center">
+    <div className="absolute inset-0 flex flex-col items-center justify-center text-black bg-gradient-to-b from-white to-blue-200 p-8 rounded-lg shadow-lg">
+        <h1 className="text-5xl font-bold mt-8">Contact</h1>
+        <p className="text-lg text-gray-700 mb-8">
+
+        </p>
+       
+    </div>
+</div>
+<br />
+<br />
+<br /> 
       <div>
         <h1 className="text-3xl font-bold text-center mb-4">Get In Touch With Us</h1>
         <p className="text-center mb-6">

@@ -51,65 +51,63 @@ function LoginForm() {
 
   return (
     <>
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6 animate-fade-in">
-        <h1
-          className="text-4xl font-bold text-center mb-6 text-amber-600 animate-bounce"
-          style={{ color: '#b88e2f' }}
-        >
-          Log In
-        </h1>
-        <div
-          className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md animate-slide-up"
-        >
-          <form onSubmit={onSubmit} className="flex flex-col space-y-4">
-            <input
-              value={email}
-              type="email"
-              placeholder="Email"
-              required
-              className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 transition duration-300 ease-in-out"
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-              value={password}
-              type="password"
-              placeholder="Password"
-              required
-              className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 transition duration-300 ease-in-out"
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <button
-              type="submit"
-              className="text-white p-3 rounded-lg transition duration-300 ease-in-out"
-              style={{ backgroundColor: '#b88e2f', color: 'white' }}
-            >
-              Log In
-            </button>
-          </form>
-          <div className="flex items-center justify-center my-4">
-            <span className="text-gray-600">or</span>
-          </div>
+       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-slate-400 to-blue-600 p-6">
+      <h1 className="text-5xl font-bold text-center mb-8 text-white">
+        Log In
+      </h1>
+      <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-md">
+        <form onSubmit={onSubmit} className="flex flex-col space-y-5">
+          <input
+            value={email}
+            type="email"
+            placeholder="Email"
+            required
+            className="p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            value={password}
+            type="password"
+            placeholder="Password"
+            required
+            className="p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
+            onChange={(e) => setPassword(e.target.value)}
+          />
           <button
-            onClick={handleSigninWithGoogle}
-            className="text-white p-3 rounded-lg transition duration-300 ease-in-out w-full"
-            style={{ backgroundColor: '#b88e2f', color: 'white' }}
+            type="submit"
+            className="text-white bg-blue-600 p-4 rounded-lg transition duration-200 hover:bg-blue-700"
           >
-            Sign In With Google
+            Log In
           </button>
-          <br />
-          <br />
-          <div className="text-center">
-            Don't have an account? <Link className="underline text-lg" to="/signup">Sign Up</Link>
-          </div>
+        </form>
+        <div className="flex items-center justify-center my-4">
+          <span className="text-gray-600">or</span>
         </div>
-
-        {/* Display admin credentials */}
-        <div className="mt-6 bg-white p-4 rounded-lg shadow-lg w-full max-w-md">
-          <h2 className="text-lg font-semibold">Admin Credentials:</h2>
-          <p>Email: <span className="font-bold">admin@gmail.com</span></p>
-          <p>Password: <span className="font-bold">123456</span></p>
+        <button
+          onClick={handleSigninWithGoogle}
+          className="text-white bg-blue-600 p-4 rounded-lg transition duration-200 hover:bg-blue-700 w-full"
+        >
+          Sign In With Google
+        </button>
+        <div className="text-center mt-6">
+          Don't have an account?{" "}
+          <Link className="underline text-blue-600" to="/signup">
+            Sign Up
+          </Link>
         </div>
       </div>
+
+      {/* Admin credentials section */}
+      <div className="mt-8 bg-white p-4 rounded-lg shadow-lg w-full max-w-md">
+        <h2 className="text-lg font-semibold">Admin Credentials:</h2>
+        <p>
+          Email: <span className="font-bold">admin@gmail.com</span>
+        </p>
+        <p>
+          Password: <span className="font-bold">123456</span>
+        </p>
+      </div>
+    </div>
     </>
   );
 }

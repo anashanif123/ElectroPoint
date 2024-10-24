@@ -14,69 +14,54 @@ function SignUp() {
     e.preventDefault();
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        // Signed up
         const user = userCredential.user;
-        
-        // Save user data to Firestore
         const userDocRef = doc(db, "users", user.uid);
         setDoc(userDocRef, {
           username: username,
           email: email,
-          createdAt: new Date()
+          createdAt: new Date(),
         })
-        .then(() => {
-          console.log("User data saved to Firestore");
-          navigate("/");
-        })
-        .catch((error) => {
-          console.error("Error saving user data: ", error);
-        });
+          .then(() => {
+            console.log("User data saved to Firestore");
+            navigate("/");
+          })
+          .catch((error) => {
+            console.error("Error saving user data: ", error);
+          });
       })
       .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.error(errorCode, errorMessage);
+        console.error(error.code, error.message);
       });
   }
 
   function handleSubmitWithGoogle() {
     const provider = new GoogleAuthProvider();
-    provider.addScope("https://www.googleapis.com/auth/contacts.readonly");
     signInWithPopup(auth, provider)
       .then((result) => {
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        const token = credential.accessToken;
         const user = result.user;
-        
-        // Save Google user data to Firestore
         const userDocRef = doc(db, "users", user.uid);
         setDoc(userDocRef, {
           username: user.displayName,
           email: user.email,
-          createdAt: new Date()
-        }, { merge: true }) // Use merge: true to update existing documents
-        .then(() => {
-          console.log("Google user data saved to Firestore");
-          navigate("/");
-        })
-        .catch((error) => {
-          console.error("Error saving Google user data: ", error);
-        });
+          createdAt: new Date(),
+        }, { merge: true })
+          .then(() => {
+            console.log("Google user data saved to Firestore");
+            navigate("/");
+          })
+          .catch((error) => {
+            console.error("Error saving Google user data: ", error);
+          });
       })
       .catch((error) => {
-        const errorMessage = error.message;
-        alert(errorMessage);
+        alert(error.message);
       });
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6 animate-fade-in">
-      <h1 className="text-4xl font-bold text-center mb-6 animate-bounce"
-      style={{  color: '#b88e2f' }}>
-        
-        Sign Up
-      </h1>
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md animate-slide-up">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-slate-400 to-blue-600 p-6">
+      <h1 className="text-4xl font-bold text-white text-center mb-6">Sign Up</h1>
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <form onSubmit={onSubmit} className="flex flex-col space-y-4">
           <input
             value={username}
@@ -84,14 +69,14 @@ function SignUp() {
             type="text"
             placeholder="Username"
             required
-            className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-700 transition duration-300 ease-in-out"
+            className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
           />
           <input
             value={email}
             type="email"
             placeholder="Email"
             required
-            className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-700 transition duration-300 ease-in-out"
+            className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
             onChange={(e) => setEmail(e.target.value)}
           />
           <input
@@ -99,29 +84,27 @@ function SignUp() {
             type="password"
             placeholder="Password"
             required
-            className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber -700 transition duration-300 ease-in-out"
+            className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
             onChange={(e) => setPassword(e.target.value)}
           />
           <button
-                type="submit"
-                className=" text-white p-3 rounded-lg  transition duration-300 ease-in-out"
-                style={{ backgroundColor: '#b88e2f', color: 'white' }}
-              >
-                Sign up
-              </button>
-            </form>
-            <div className="flex items-center justify-center my-4">
-              <span className="text-gray-600">or</span>
-            </div>
-            <button
-              onClick={handleSubmitWithGoogle}
-              className=" text-white p-3 rounded-lg -700 transition duration-300 ease-in-out w-full "
-              style={{ backgroundColor: '#b88e2f', color: 'white' }}
-            >
-              Sign up With Google
-            </button>
+            type="submit"
+            className="text-white p-3 rounded-lg bg-blue-600 hover:bg-blue-700 transition duration-300"
+          >
+            Sign Up
+          </button>
+        </form>
+        <div className="flex items-center justify-center my-4">
+          <span className="text-gray-600">or</span>
+        </div>
+        <button
+          onClick={handleSubmitWithGoogle}
+          className="text-white p-3 rounded-lg bg-blue-600 hover:bg-blue-700 transition duration-300 w-full"
+        >
+          Sign Up With Google
+        </button>
         <p className="text-sm text-gray-600 text-center mt-4">
-          Already have an account? <Link to="/login">Log In</Link>
+          Already have an account? <Link className="text-blue-600 underline" to="/login">Log In</Link>
         </p>
       </div>
     </div>

@@ -6,7 +6,7 @@ import jsPDF from "jspdf"; // Import jsPDF
 import Footer from "../components/Footer.jsx";
 import Benefits from "../components/Benefit.jsx";
 import { message, Spin } from "antd";
-import backgroundImage from "../assets/pics/Rectangle 1.jpg";
+// import backgroundImage from "../assets/pics/Rectangle 1.jpg";
 import { useNavigate } from "react-router";
 
 function CheckoutPage() {
@@ -116,67 +116,100 @@ function CheckoutPage() {
 
   const generatePDF = (orderData) => {
     const doc = new jsPDF();
-    const margin = 10;
+    const margin = 15;
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
   
+    // Colors
+    const backgroundColor = [240, 248, 255]; // Light blue-gray
+    const primaryTextColor = [33, 37, 41]; // Dark gray
+    const secondaryTextColor = [108, 117, 125]; // Medium gray
+    const highlightColor = [52, 152, 219]; // Blue for highlights
+  
     // Background Color
-    doc.setFillColor(240, 240, 255); // Light blue background
+    doc.setFillColor(...backgroundColor);
     doc.rect(0, 0, pageWidth, pageHeight, 'F');
   
-    // Title
-    doc.setFontSize(18);
+    // Add header
+    doc.setFontSize(24);
+    doc.setTextColor(...highlightColor);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(0, 0, 128); // Dark blue title
-    doc.text("Order Summary", pageWidth / 2, margin, { align: "center" });
+    doc.text("Invoice", margin, margin + 10);
   
-    // User Details
-    doc.setFontSize(10);
+    // Order Details Section
+    doc.setFontSize(12);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(0, 0, 0); // Black text
-    doc.text(`Name: ${orderData.userDetails.name}`, margin, margin + 10);
-    doc.text(`Email: ${orderData.userDetails.email}`, margin, margin + 15);
-    doc.text(`Address: ${orderData.userDetails.address}`, margin, margin + 20);
+    doc.setTextColor(...primaryTextColor);
+    doc.text(`Order Date: ${orderData.createdAt.toLocaleDateString()}`, margin, margin + 25);
+    doc.text(`Order Number: #${Math.floor(Math.random() * 100000)}`, margin, margin + 30);
   
-    // Items Header
-    doc.text("Items:", margin, margin + 30);
+    // Customer Info
+    doc.setTextColor(...secondaryTextColor);
     doc.setFont("helvetica", "bold");
-    const itemsStartY = margin + 35;
-  
-    // Draw a line
-    doc.setDrawColor(200);
-    doc.line(margin, itemsStartY - 5, pageWidth - margin, itemsStartY - 5);
-  
-    // Item List
-    let y = itemsStartY + 5; // Starting position for items
+    doc.text("Customer Information:", margin, margin + 45);
     doc.setFont("helvetica", "normal");
+    doc.setTextColor(...primaryTextColor);
+    doc.text(`Name: ${orderData.userDetails.name}`, margin, margin + 50);
+    doc.text(`Email: ${orderData.userDetails.email}`, margin, margin + 55);
+    doc.text(`Address: ${orderData.userDetails.address}`, margin, margin + 60);
+    doc.text(`WhatsApp: ${orderData.userDetails.whatsapp}`, margin, margin + 65);
+  
+    // Table Borders
+    const startTableY = margin + 80;
+    doc.setDrawColor(0); // Black borders
+    doc.rect(margin, startTableY, pageWidth - 2 * margin, 10); // Table header row
+  
+    // Table Headers
+    doc.setFont("helvetica", "bold");
+    doc.setFillColor(...highlightColor);
+    doc.setTextColor(255, 255, 255); // White text for header
+    doc.rect(margin, startTableY, pageWidth - 2 * margin, 10, 'F'); // Header background
+  
+    const colItemX = margin + 5;
+    const colQuantityX = pageWidth / 2 - 20; // Adjusted quantity column position
+    const colTotalX = pageWidth - margin - 30;
+  
+    doc.text("Item", colItemX, startTableY + 7);
+    doc.text("Quantity", colQuantityX, startTableY + 7);
+    doc.text("Total", colTotalX, startTableY + 7);
+  
+    // Table Content
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...primaryTextColor);
+    let y = startTableY + 15;
   
     orderData.cartItems.forEach((item) => {
-      const itemDescription = `${item.title} (x${item.quantity}) - $${(item.price * item.quantity).toFixed(2)}`;
-      doc.text(itemDescription, margin, y);
-      y += 5;
+      // Row borders for each item
+      doc.rect(margin, y - 5, pageWidth - 2 * margin, 10); // Row border
+  
+      // Column content
+      doc.text(item.title, colItemX, y);
+      doc.text(`${item.quantity}`, colQuantityX, y, { align: 'right' }); // Right-align quantity
+      doc.text(`$${(item.price * item.quantity).toFixed(2)}`, colTotalX, y, { align: 'right' });
+      y += 10;
     });
   
-    // Draw a line for the total
-    doc.setDrawColor(200);
-    doc.line(margin, y, pageWidth - margin, y);
-  
-    // Total Price
+    // Total
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(0, 128, 0); // Green total
-    doc.text(`Total Price: $${orderData.totalPrice}`, margin, y + 5);
+    doc.setTextColor(...highlightColor);
+    doc.rect(margin, y - 5, pageWidth - 2 * margin, 10); // Total row border
+    doc.text("Total", colItemX, y + 5);
+    doc.text(`$${orderData.totalPrice}`, colTotalX, y + 5, { align: 'right' });
   
-    // Footer
+    // Footer Section
     doc.setFont("helvetica", "italic");
-    doc.setTextColor(128, 128, 128); // Gray footer
-    const footerText = "Thank you for your order!";
-    const footerWidth = doc.getTextWidth(footerText);
-    doc.text(footerText, (pageWidth - footerWidth) / 2, pageHeight - margin);
+    doc.setFontSize(10);
+    doc.setTextColor(...secondaryTextColor);
+    doc.text(
+      "Thank you for your purchase! If you have any questions, please contact us.",
+      margin,
+      pageHeight - margin - 5
+    );
   
     // Save the PDF
-    doc.save("order_summary.pdf");
+    doc.save("invoice.pdf");
   };
-
+  
   const sendWhatsAppMessage = (orderData) => {
     const message = `Hello ${orderData.userDetails.name},\n\nThank you for your order! Here are the details:\n\n` +
                     `Items:\n` +
@@ -210,112 +243,121 @@ function CheckoutPage() {
 
   return (
     <>
-      <div className="relative text-center">
-        <div className="relative">
-          <img
-            className="w-full h-[50vh] object-cover object-center"
-            src={backgroundImage}
-            alt="Scandinavian interior mockup wall decal background"
-          />
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-black">
-            <h1 className="text-4xl font-bold">Checkout</h1>
-            <span className="text-lg mb-2">Home &gt; Checkout</span>
-          </div>
-        </div>
-      </div>
+       
+       
+      
       <div className="container mx-auto px-4 py-10">
-        <h2 className="text-4xl text-center font-semibold mb-4">Checkout</h2>
-        <div className="flex flex-wrap -mx-4">
-          {/* Left side: Shipping form */}
-          <div className="w-full lg:w-1/2 px-4 mb-6">
-            <div className="bg-white shadow-lg rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Shipping Information</h3>
-              <form>
-                <div className="mb-4">
-                  <label className="block text-gray-700" htmlFor="name">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={userDetails.name}
-                    onChange={handleInputChange}
-                    className="border rounded w-full py-2 px-3"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700" htmlFor="email">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={userDetails.email}
-                    onChange={handleInputChange}
-                    className="border rounded w-full py-2 px-3"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700" htmlFor="address">
-                    Address
-                  </label>
-                  <input
-                    type="text"
-                    id="address"
-                    name="address"
-                    value={userDetails.address}
-                    onChange={handleInputChange}
-                    className="border rounded w-full py-2 px-3"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700" htmlFor="whatsapp">
-                    WhatsApp Number
-                  </label>
-                  <input
-                    type="text"
-                    id="whatsapp"
-                    name="whatsapp"
-                    value={userDetails.whatsapp}
-                    onChange={handleInputChange}
-                    className="border rounded w-full py-2 px-3"
-                    required
-                  />
-                </div>
-              </form>
-            </div>
+  <h2 className="text-4xl text-center font-semibold mb-10 text-black bg-gradient-to-b from-white to-blue-200 p-8 rounded-lg shadow-lg">Checkout</h2>
+  <div className="flex flex-wrap -mx-4">
+    <div className="w-full lg:w-1/2 px-4 mb-6">
+      <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">
+        <h3 className="text-2xl font-semibold mb-6 text-gray-900">Shipping Information</h3>
+        <form>
+          {/* Name Input */}
+          <div className="mb-6">
+            <label className="block text-gray-700 font-medium mb-2" htmlFor="name">
+              Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={userDetails.name}
+              onChange={handleInputChange}
+              className="border border-gray-300 rounded-lg w-full py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your name"
+              required
+            />
           </div>
+
+          {/* Email Input */}
+          <div className="mb-6">
+            <label className="block text-gray-700 font-medium mb-2" htmlFor="email">
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={userDetails.email}
+              onChange={handleInputChange}
+              className="border border-gray-300 rounded-lg w-full py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+
+          {/* Address Input */}
+          <div className="mb-6">
+            <label className="block text-gray-700 font-medium mb-2" htmlFor="address">
+              Address
+            </label>
+            <input
+              type="text"
+              id="address"
+              name="address"
+              value={userDetails.address}
+              onChange={handleInputChange}
+              className="border border-gray-300 rounded-lg w-full py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your address"
+              required
+            />
+          </div>
+
+          {/* WhatsApp Input */}
+          <div className="mb-6">
+            <label className="block text-gray-700 font-medium mb-2" htmlFor="whatsapp">
+              WhatsApp Number
+            </label>
+            <input
+              type="text"
+              id="whatsapp"
+              name="whatsapp"
+              value={userDetails.whatsapp}
+              onChange={handleInputChange}
+              className="border border-gray-300 rounded-lg w-full py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your WhatsApp number"
+              required
+            />
+          </div>
+
+        
+        </form>
+      </div>
+    </div>
+ 
+
 
           {/* Right side: Order Summary */}
           <div className="w-full lg:w-1/2 px-4">
-            <div style={{ backgroundColor: "#f9f1e7" }} className="p-6 rounded-lg">
-              <h3 className="text-xl font-semibold mb-4">Order Summary</h3>
-              {cartItems.map((item) => (
-                <div key={item.id} className="flex justify-between mb-2">
-                  <span>
-                    {item.title} (x{item.quantity})
-                  </span>
-                  <span>${(item.price * item.quantity).toFixed(2)}</span>
-                </div>
-              ))}
-              <h4 className="font-semibold">
-                Total Price: ${calculateTotalPrice()}
-              </h4>
-              <div className="text-center mt-8">
-                <button
-                  onClick={handleCheckout}
-                  className="text-black w-64 py-2 px-4 rounded-xl mt-4 transition-colors border border-black"
-                >
-                  Place Order
-                </button>
-              </div>
-            </div>
-          </div>
+  <div className="p-6 border border-gray-200 rounded-lg shadow-lg bg-white">
+    <h3 className="text-2xl font-semibold mb-6 text-gray-800">Order Summary</h3>
+    <div className="divide-y divide-gray-200">
+      {cartItems.map((item) => (
+        <div key={item.id} className="flex justify-between py-4">
+          <span className="text-gray-700 font-medium">
+            {item.title} <span className="text-sm text-gray-500">x{item.quantity}</span>
+          </span>
+          <span className="text-gray-900 font-semibold">${(item.price * item.quantity).toFixed(2)}</span>
+        </div>
+      ))}
+    </div>
+    <div className="mt-6 border-t border-gray-300 pt-4">
+      <h4 className="text-xl font-semibold text-gray-800">
+        Total Price: <span className="text-blue-600">${calculateTotalPrice()}</span>
+      </h4>
+    </div>
+    <div className="text-center mt-8">
+      <button
+        onClick={handleCheckout}
+        className="bg-blue-600 hover:bg-blue-700 text-white w-full py-3 rounded-lg shadow-md hover:shadow-xl transition duration-300 ease-in-out transform hover:scale-105"
+      >
+        Place Order
+      </button>
+    </div>
+  </div>
+</div>
+
         </div>
 
         <Benefits />

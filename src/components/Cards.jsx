@@ -84,7 +84,7 @@ function Cards() {
         <div className="text-center">
         <Link to={"/Shop"}>
           <button
-            // style={{ borderColor: "#b88e2f", color: "#b88e2f" }}
+           
             className="m-auto mt-9 bg-white px-6 py-2 border w-60 font-bold border-blue-500 text-blue-600"
           >
             Show More

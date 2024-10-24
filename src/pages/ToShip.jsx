@@ -6,7 +6,7 @@ import {
   ClockCircleOutlined,
   CarOutlined,
   CheckCircleOutlined,
-} from "@ant-design/icons"; 
+} from "@ant-design/icons";   
 
 function ToShip() {
   const [orders, setOrders] = useState([]);
@@ -62,7 +62,7 @@ function ToShip() {
 
   return (
     <div className="ship p-6">
-      <h2 className="text-2xl font-bold mb-4 text-center bg-[#b88e2f] text-white py-2 rounded">
+      <h2 className="text-2xl font-bold mb-4 text-center bg-blue-500 text-white py-2 rounded">
         Order In Progress
       </h2>
       {isLoading ? (
